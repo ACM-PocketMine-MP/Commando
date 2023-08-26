@@ -153,7 +153,8 @@ class PacketHooker implements Listener {
 					$refProp->setValue($param->enum, "enum#" . spl_object_id($param->enum));
 				}
 			}
-			$combinations[] =  new CommandOverload(false, $set);
+
+			$combinations[] = new CommandOverload(false, $set);
 
 			foreach($indexes as $k => $v){
 				$indexes[$k]++;
