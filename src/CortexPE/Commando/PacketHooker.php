@@ -97,9 +97,8 @@ class PacketHooker implements Listener{
 			$packetAssembler = AvailableCommandsPacketAssembler::assemble($commandData, array_values($packetDisassembler->unusedHardEnums), array_values($packetDisassembler->unusedSoftEnums));
             $packetAssembler->softEnums = SoftEnumStore::getEnums();
 
-			$pk->softEnums = SoftEnumStore::getEnums();
 			self::$isIntercepting = true;
-			$target->sendDataPacket($pk);
+			$target->sendDataPacket($packetAssembler);
 			self::$isIntercepting = false;
 			return false;
 		});
