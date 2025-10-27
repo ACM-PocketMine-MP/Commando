@@ -89,7 +89,7 @@ class PacketHooker implements Listener{
 					$overloads = self::generateOverloads($p, $cmd);
 					$commandData[] = new CommandData($data->getName(), $data->getDescription(), $data->getFlags(), $data->getPermission(), $data->getAliases(), $overloads, $data->getChainedSubCommandData());
 				}else{
-					$commandData = $data; // NOTE: $packetDisassembler->commandData[]
+					$commandData[] = $data; // NOTE: $packetDisassembler->commandData[]
 				}
 			}
 

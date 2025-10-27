@@ -48,7 +48,6 @@ abstract class StringEnumArgument extends BaseArgument{
 	 */
 	public function __construct(string $name, bool $optional = false){
 		parent::__construct($name, $optional);
-
 		$this->parameterData->enum = new CommandHardEnum("", $this->getEnumValues());
 	}
 
@@ -74,9 +73,9 @@ abstract class StringEnumArgument extends BaseArgument{
 
 	/**
 	 * @param string $string
-	 * @return string
+	 * @return mixed
 	 */
-	public function getValue(string $string): string{
+	public function getValue(string $string): mixed{
 		return static::VALUES[strtolower($string)];
 	}
 
