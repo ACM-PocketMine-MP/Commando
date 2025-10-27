@@ -29,41 +29,61 @@ declare(strict_types=1);
 
 namespace CortexPE\Commando\args;
 
-
 use pocketmine\command\CommandSender;
-use pocketmine\network\mcpe\protocol\types\command\CommandEnum;
+use pocketmine\network\mcpe\protocol\types\command\CommandHardEnum;
+
 use function array_keys;
 use function array_map;
 use function implode;
 use function preg_match;
 use function strtolower;
 
-abstract class StringEnumArgument extends BaseArgument {
+abstract class StringEnumArgument extends BaseArgument{
+
 	protected const VALUES = [];
 
-	public function __construct(string $name, bool $optional = false) {
+	/**
+	 * @param string $name
+	 * @param boolean $optional
+	 */
+	public function __construct(string $name, bool $optional = false){
 		parent::__construct($name, $optional);
 
-		$this->parameterData->enum = new CommandEnum("", $this->getEnumValues());
+		$this->parameterData->enum = new CommandHardEnum("", $this->getEnumValues());
 	}
 
-	public function getNetworkType(): int {
+	/**
+	 * @return integer
+	 */
+	public function getNetworkType(): int{
 		// this will be disregarded by PM anyways because this will be considered as a string enum
 		return -1;
 	}
 
-	public function canParse(string $testString, CommandSender $sender): bool {
+	/**
+	 * @param string $testString
+	 * @param CommandSender $sender
+	 * @return boolean
+	 */
+	public function canParse(string $testString, CommandSender $sender): bool{
 		return (bool)preg_match(
 			"/^(" . implode("|", array_map("\\strtolower", $this->getEnumValues())) . ")$/iu",
 			$testString
 		);
 	}
 
-	public function getValue(string $string) {
+	/**
+	 * @param string $string
+	 * @return string
+	 */
+	public function getValue(string $string): string{
 		return static::VALUES[strtolower($string)];
 	}
 
-	public function getEnumValues(): array {
+	/**
+	 * @return array
+	 */
+	public function getEnumValues(): array{
 		return array_keys(static::VALUES);
 	}
 }

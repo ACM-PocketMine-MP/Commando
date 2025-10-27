@@ -29,20 +29,20 @@ declare(strict_types=1);
 
 namespace CortexPE\Commando\args;
 
-
 use pocketmine\command\CommandSender;
 use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
 use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
 
-abstract class BaseArgument {
-	/** @var string */
+abstract class BaseArgument{
+
+	/** @var string $name*/
 	protected string $name;
-	/** @var bool */
+	/** @var bool $optional*/
 	protected bool $optional = false;
-	/** @var CommandParameter */
+	/** @var CommandParameter $parameterData*/
 	protected CommandParameter $parameterData;
 
-	public function __construct(string $name, bool $optional = false) {
+	public function __construct(string $name, bool $optional = false){
 		$this->name = $name;
 		$this->optional = $optional;
 
@@ -53,6 +53,9 @@ abstract class BaseArgument {
 		$this->parameterData->isOptional = $this->isOptional();
 	}
 
+	/**
+	 * @return integer
+	 */
 	abstract public function getNetworkType(): int;
 
 	/**
@@ -69,19 +72,19 @@ abstract class BaseArgument {
 	 *
 	 * @return mixed
 	 */
-	abstract public function parse(string $argument, CommandSender $sender) : mixed;
+	abstract public function parse(string $argument, CommandSender $sender): mixed;
 
 	/**
 	 * @return string
 	 */
-	public function getName(): string {
+	public function getName(): string{
 		return $this->name;
 	}
 
 	/**
 	 * @return bool
 	 */
-	public function isOptional(): bool {
+	public function isOptional(): bool{
 		return $this->optional;
 	}
 
@@ -91,13 +94,19 @@ abstract class BaseArgument {
 	 *
 	 * @return int
 	 */
-	public function getSpanLength(): int {
+	public function getSpanLength(): int{
 		return 1;
 	}
 
+	/**
+	 * @return string
+	 */
 	abstract public function getTypeName(): string;
 
-	public function getNetworkParameterData():CommandParameter {
+	/**
+	 * @return CommandParameter
+	 */
+	public function getNetworkParameterData(): CommandParameter{
 		return $this->parameterData;
 	}
 }

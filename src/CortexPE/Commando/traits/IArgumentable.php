@@ -29,18 +29,37 @@ declare(strict_types=1);
 
 namespace CortexPE\Commando\traits;
 
-
 use CortexPE\Commando\args\BaseArgument;
 use pocketmine\command\CommandSender;
 
-interface IArgumentable {
+interface IArgumentable{
+
+	/**
+	 * @return string
+	 */
 	public function generateUsageMessage(): string;
+
+	/**
+	 * @return boolean
+	 */
 	public function hasArguments(): bool;
 
 	/**
-	 * @return BaseArgument[][]
+	 * @return BaseArgument[]
 	 */
 	public function getArgumentList(): array;
+
+	/**
+	 * @param array $rawArgs
+	 * @param CommandSender $sender
+	 * @return array
+	 */
 	public function parseArguments(array $rawArgs, CommandSender $sender): array;
+
+	/**
+	 * @param integer $position
+	 * @param BaseArgument $argument
+	 * @return void
+	 */
 	public function registerArgument(int $position, BaseArgument $argument): void;
 }

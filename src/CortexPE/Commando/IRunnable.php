@@ -29,7 +29,6 @@ declare(strict_types=1);
 
 namespace CortexPE\Commando;
 
-
 use CortexPE\Commando\constraint\BaseConstraint;
 
 /**
@@ -40,7 +39,11 @@ use CortexPE\Commando\constraint\BaseConstraint;
  *
  * @package CortexPE\Commando
  */
-interface IRunnable {
+interface IRunnable{
+
+    /**
+     * @return string
+     */
     public function getName(): string;
 
     /**
@@ -48,7 +51,10 @@ interface IRunnable {
      */
     public function getAliases(): array;
 
-    public function getUsageMessage():string;
+    /**
+     * @return string
+     */
+    public function getUsageMessage(): string;
 
     /**
      * @return string[]
@@ -58,5 +64,5 @@ interface IRunnable {
     /**
      * @return BaseConstraint[]
      */
-    public function getConstraints():array;
+    public function getConstraints(): array;
 }

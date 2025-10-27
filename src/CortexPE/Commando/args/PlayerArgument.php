@@ -25,42 +25,58 @@
  * Written by @CortexPE <https://CortexPE.xyz>
  *
  */
-declare(strict_types=1);
 
-namespace CortexPE\Commando\constraint;
+declare(strict_types = 1);
 
+namespace CortexPE\Commando\args;
 
 use pocketmine\command\CommandSender;
-use pocketmine\player\Player;
-use pocketmine\utils\TextFormat;
+use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
+use function is_null;
+use function preg_match;
+use function strtolower;
 
-class ConsoleRequiredConstraint extends BaseConstraint{
+class PlayerArgument extends BaseArgument{
 
     /**
+     * @param boolean $optional
+     * @param string|null $name
+     */
+	public function __construct(bool $optional = false, ?string $name = null){
+		$name = is_null($name) ? "player" : $name;
+
+		parent::__construct($name, $optional);
+	}
+
+    /**
+     * @return string
+     */
+	public function getTypeName(): string{
+		return "player";
+	}
+
+    /**
+     * @return integer
+     */
+	public function getNetworkType(): int{
+		return AvailableCommandsPacket::ARG_TYPE_TARGET;
+	}
+
+    /**
+     * @param string $testString
      * @param CommandSender $sender
-     * @param string $aliasUsed
-     * @param array $args
      * @return boolean
      */
-    public function test(CommandSender $sender, string $aliasUsed, array $args): bool{
-        return $this->isVisibleTo($sender);
-    }
+	public function canParse(string $testString, CommandSender $sender): bool{
+		return (bool) preg_match("/^(?!rcon|console)[a-zA-Z0-9_ ]{1,16}$/i", $testString);
+	}
 
     /**
+     * @param string $argument
      * @param CommandSender $sender
-     * @param string $aliasUsed
-     * @param array $args
-     * @return void
+     * @return string
      */
-    public function onFailure(CommandSender $sender, string $aliasUsed, array $args): void{
-        $sender->sendMessage(TextFormat::RED . "This command must be executed from a server console."); // f*ck off grammar police
-    }
-
-    /**
-     * @param CommandSender $sender
-     * @return boolean
-     */
-    public function isVisibleTo(CommandSender $sender): bool{
-		return !($sender instanceof Player);
+	public function parse(string $argument, CommandSender $sender): string{
+		return strtolower($argument);
 	}
 }

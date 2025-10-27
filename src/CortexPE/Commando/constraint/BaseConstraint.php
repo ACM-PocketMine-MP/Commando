@@ -29,12 +29,12 @@ declare(strict_types=1);
 
 namespace CortexPE\Commando\constraint;
 
-
 use CortexPE\Commando\IRunnable;
 use pocketmine\command\CommandSender;
 
-abstract class BaseConstraint {
-    /** @var IRunnable */
+abstract class BaseConstraint{
+
+    /** @var IRunnable $context*/
     protected IRunnable $context;
 
     /**
@@ -44,20 +44,36 @@ abstract class BaseConstraint {
      *
      * @param IRunnable $context
      */
-    public function __construct(IRunnable $context) {
+    public function __construct(IRunnable $context){
         $this->context = $context;
     }
 
     /**
      * @return IRunnable
      */
-    public function getContext(): IRunnable {
+    public function getContext(): IRunnable{
         return $this->context;
     }
 
+    /**
+     * @param CommandSender $sender
+     * @param string $aliasUsed
+     * @param array $args
+     * @return boolean
+     */
     abstract public function test(CommandSender $sender, string $aliasUsed, array $args): bool;
 
+    /**
+     * @param CommandSender $sender
+     * @param string $aliasUsed
+     * @param array $args
+     * @return void
+     */
     abstract public function onFailure(CommandSender $sender, string $aliasUsed, array $args): void;
 
+    /**
+     * @param CommandSender $sender
+     * @return boolean
+     */
     abstract public function isVisibleTo(CommandSender $sender): bool;
 }

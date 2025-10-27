@@ -29,20 +29,28 @@ declare(strict_types=1);
 
 namespace CortexPE\Commando\args;
 
-
 use pocketmine\command\CommandSender;
 
-class BooleanArgument extends StringEnumArgument {
+class BooleanArgument extends StringEnumArgument{
+
 	protected const VALUES = [
 		"true" => true,
 		"false" => false,
 	];
 
-	public function getTypeName(): string {
+	/**
+	 * @return string
+	 */
+	public function getTypeName(): string{
 		return "bool";
 	}
 
-	public function parse(string $argument, CommandSender $sender) : mixed{
+	/**
+	 * @param string $argument
+	 * @param CommandSender $sender
+	 * @return mixed
+	 */
+	public function parse(string $argument, CommandSender $sender): mixed{
 		return $this->getValue($argument);
 	}
 }

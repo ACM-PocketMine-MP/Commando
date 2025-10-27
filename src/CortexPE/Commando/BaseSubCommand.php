@@ -29,35 +29,34 @@ declare(strict_types=1);
 
 namespace CortexPE\Commando;
 
-
 use CortexPE\Commando\constraint\BaseConstraint;
 use CortexPE\Commando\traits\ArgumentableTrait;
 use CortexPE\Commando\traits\IArgumentable;
 use pocketmine\command\CommandSender;
 use pocketmine\permission\PermissionManager;
 use pocketmine\plugin\Plugin;
-use function explode;
 
-abstract class BaseSubCommand implements IArgumentable, IRunnable {
+abstract class BaseSubCommand implements IArgumentable, IRunnable{
 	use ArgumentableTrait;
-	/** @var string */
+
+	/** @var string $name*/
 	private string $name;
-	/** @var string[] */
+	/** @var string[] $aliases*/
 	private array $aliases;
-	/** @var string */
+	/** @var string $description */
 	private string $description;
-	/** @var string */
+	/** @var string $usageMessage */
 	protected string $usageMessage;
-	/** @var string[] */
+	/** @var string[] $permissions */
 	private array $permissions = [];
-	/** @var CommandSender */
+	/** @var CommandSender $currentSender */
 	protected CommandSender $currentSender;
-	/** @var BaseCommand */
+	/** @var BaseCommand $parent */
 	protected BaseCommand $parent;
-	/** @var BaseConstraint[] */
+	/** @var BaseConstraint[] $constraints */
 	private array $constraints = [];
 
-	public function __construct(string $name, string $description = "", array $aliases = []) {
+	public function __construct(string $name, string $description = "", array $aliases = []){
 		$this->name = $name;
 		$this->description = $description;
 		$this->aliases = $aliases;
@@ -67,47 +66,54 @@ abstract class BaseSubCommand implements IArgumentable, IRunnable {
 		$this->usageMessage = $this->generateUsageMessage();
 	}
 
+	/**
+	 * @param CommandSender $sender
+	 * @param string $aliasUsed
+	 * @param array $args
+	 * @return void
+	 */
 	abstract public function onRun(CommandSender $sender, string $aliasUsed, array $args): void;
 
 	/**
 	 * @return string
 	 */
-	public function getName(): string {
+	public function getName(): string{
 		return $this->name;
 	}
 
 	/**
 	 * @return string[]
 	 */
-	public function getAliases(): array {
+	public function getAliases(): array{
 		return $this->aliases;
 	}
 
 	/**
 	 * @return string
 	 */
-	public function getDescription(): string {
+	public function getDescription(): string{
 		return $this->description;
 	}
 
 	/**
 	 * @return string
 	 */
-	public function getUsageMessage(): string {
+	public function getUsageMessage(): string{
 		return $this->usageMessage;
 	}
 
 	/**
 	 * @return string[]
 	 */
-	public function getPermissions(): array {
+	public function getPermissions(): array{
 		return $this->permissions;
 	}
 
 	/**
 	 * @param array $permissions
+	 * @return void
 	 */
-	public function setPermissions(array $permissions): void {
+	public function setPermissions(array $permissions): void{
 		$permissionManager = PermissionManager::getInstance();
 		foreach($permissions as $perm){
 			if($permissionManager->getPermission($perm) === null){
@@ -117,7 +123,11 @@ abstract class BaseSubCommand implements IArgumentable, IRunnable {
 		$this->permissions = $permissions;
 	}
 
-	public function setPermission(string $permission): void {
+	/**
+	 * @param string $permission
+	 * @return void
+	 */
+	public function setPermission(string $permission): void{
 		$permissionManager = PermissionManager::getInstance();
 		if($permissionManager->getPermission($permission) === null){
 			throw new \InvalidArgumentException("Cannot use non-existing permission \"$permission\"");
@@ -125,9 +135,13 @@ abstract class BaseSubCommand implements IArgumentable, IRunnable {
 		$this->permissions[] = $permission;
 	}
 
-	public function testPermissionSilent(CommandSender $sender): bool {
-		foreach($this->permissions as $permission) {
-			if($sender->hasPermission($permission)) {
+	/**
+	 * @param CommandSender $sender
+	 * @return boolean
+	 */
+	public function testPermissionSilent(CommandSender $sender): bool{
+		foreach($this->permissions as $permission){
+			if($sender->hasPermission($permission)){
 				return true;
 			}
 		}
@@ -140,7 +154,7 @@ abstract class BaseSubCommand implements IArgumentable, IRunnable {
 	 *
 	 * @internal Used to pass the current sender from the parent command
 	 */
-	public function setCurrentSender(CommandSender $currentSender): void {
+	public function setCurrentSender(CommandSender $currentSender): void{
 		$this->currentSender = $currentSender;
 	}
 
@@ -149,33 +163,45 @@ abstract class BaseSubCommand implements IArgumentable, IRunnable {
 	 *
 	 * @internal Used to pass the parent context from the parent command
 	 */
-	public function setParent(BaseCommand $parent): void {
+	public function setParent(BaseCommand $parent): void{
 		$this->parent = $parent;
 	}
 
-	public function sendError(int $errorCode, array $args = []): void {
+	/**
+	 * @param integer $errorCode
+	 * @param array $args
+	 * @return void
+	 */
+	public function sendError(int $errorCode, array $args = []): void{
 		$this->parent->sendError($errorCode, $args);
 	}
 
-	public function sendUsage():void {
+	/**
+	 * @return void
+	 */
+	public function sendUsage(): void{
 		$this->currentSender->sendMessage("/{$this->parent->getName()} $this->usageMessage");
 	}
 
-    public function addConstraint(BaseConstraint $constraint) : void {
+	/**
+	 * @param BaseConstraint $constraint
+	 * @return void
+	 */
+    public function addConstraint(BaseConstraint $constraint): void{
         $this->constraints[] = $constraint;
     }
 
     /**
      * @return BaseConstraint[]
      */
-    public function getConstraints(): array {
+    public function getConstraints(): array{
         return $this->constraints;
     }
 
 	/**
 	 * @return Plugin
 	 */
-	public function getOwningPlugin(): Plugin {
+	public function getOwningPlugin(): Plugin{
 		return $this->parent->getOwningPlugin();
 	}
 }

@@ -50,7 +50,7 @@ trait ArgumentableTrait{
 	/**
 	 * This is where all the arguments, permissions, sub-commands, etc would be registered
 	 */
-	abstract protected function prepare() : void;
+	abstract protected function prepare(): void;
 
 	/**
 	 * @param int          $position
@@ -58,15 +58,15 @@ trait ArgumentableTrait{
 	 *
 	 * @throws ArgumentOrderException
 	 */
-	public function registerArgument(int $position, BaseArgument $argument): void {
-		if($position < 0) {
+	public function registerArgument(int $position, BaseArgument $argument): void{
+		if($position < 0){
 			throw new ArgumentOrderException("You cannot register arguments at negative positions");
 		}
-		if($position > 0 && !isset($this->argumentList[$position - 1])) {
+		if($position > 0 && !isset($this->argumentList[$position - 1])){
 			throw new ArgumentOrderException("There were no arguments before $position");
 		}
-		foreach($this->argumentList[$position - 1] ?? [] as $arg) {
-			if($arg instanceof TextArgument) {
+		foreach($this->argumentList[$position - 1] ?? [] as $arg){
+			if($arg instanceof TextArgument){
 				throw new ArgumentOrderException("No other arguments can be registered after a TextArgument");
 			}
 			if($arg->isOptional() && !$argument->isOptional()){
@@ -74,30 +74,35 @@ trait ArgumentableTrait{
 			}
 		}
 		$this->argumentList[$position][] = $argument;
-		if(!$argument->isOptional()) {
+		if(!$argument->isOptional()){
 			$this->requiredArgumentCount[$position] = true;
 		}
 	}
 
-	public function parseArguments(array $rawArgs, CommandSender $sender): array {
+	/**
+	 * @param array $rawArgs
+	 * @param CommandSender $sender
+	 * @return array
+	 */
+	public function parseArguments(array $rawArgs, CommandSender $sender): array{
 		$return = [
 			"arguments" => [],
 			"errors" => []
 		];
 		// try parsing arguments
 		$required = count($this->requiredArgumentCount);
-		if(!$this->hasArguments() && count($rawArgs) > 0) { // doesnt take args but sender gives args anyways
+		if(!$this->hasArguments() && count($rawArgs) > 0){ // doesnt take args but sender gives args anyways
 			$return["errors"][] = [
 				"code" => BaseCommand::ERR_NO_ARGUMENTS,
 				"data" => []
 			];
 		}
 		$offset = 0;
-		if(count($rawArgs) > 0) {
-			foreach($this->argumentList as $pos => $possibleArguments) {
+		if(count($rawArgs) > 0){
+			foreach($this->argumentList as $pos => $possibleArguments){
 				// try the one that spans more first... before the others
-				usort($possibleArguments, function (BaseArgument $a, BaseArgument $b): int {
-					if($a->getSpanLength() === PHP_INT_MAX) { // if it takes unlimited arguments, pull it down
+				usort($possibleArguments, function (BaseArgument $a, BaseArgument $b): int{
+					if($a->getSpanLength() === PHP_INT_MAX){ // if it takes unlimited arguments, pull it down
 						return 1;
 					}
 
@@ -105,34 +110,34 @@ trait ArgumentableTrait{
 				});
 				$parsed = false;
 				$optional = true;
-				foreach($possibleArguments as $argument) {
+				foreach($possibleArguments as $argument){
 					$arg = trim(implode(" ", array_slice($rawArgs, $offset, ($len = $argument->getSpanLength()))));
-					if(!$argument->isOptional()) {
+					if(!$argument->isOptional()){
 						$optional = false;
 					}
-					if($arg !== "" && $argument->canParse($arg, $sender)) {
+					if($arg !== "" && $argument->canParse($arg, $sender)){
 						$k = $argument->getName();
 						$result = (clone $argument)->parse($arg, $sender);
-						if(isset($return["arguments"][$k]) && !is_array($return["arguments"][$k])) {
+						if(isset($return["arguments"][$k]) && !is_array($return["arguments"][$k])){
 							$old = $return["arguments"][$k];
 							unset($return["arguments"][$k]);
 							$return["arguments"][$k] = [$old];
 							$return["arguments"][$k][] = $result;
-						} else {
+						} else{
 							$return["arguments"][$k] = $result;
 						}
-						if(!$optional) {
+						if(!$optional){
 							$required--;
 						}
 						$offset += $len;
 						$parsed = true;
 						break;
 					}
-					if($offset > count($rawArgs)) {
+					if($offset > count($rawArgs)){
 						break; // we've reached the end of the argument list the user passed
 					}
 				}
-				if(!$parsed && !($optional && empty($arg))) { // we tried every other possible argument type, none was satisfied
+				if(!$parsed && !($optional && empty($arg))){ // we tried every other possible argument type, none was satisfied
 					$return["errors"][] = [
 						"code" => BaseCommand::ERR_INVALID_ARG_VALUE,
 						"data" => [
@@ -145,13 +150,13 @@ trait ArgumentableTrait{
 				}
 			}
 		}
-		if($offset < count($rawArgs)) { // this means that the arguments our user sent is more than the needed amount
+		if($offset < count($rawArgs)){ // this means that the arguments our user sent is more than the needed amount
 			$return["errors"][] = [
 				"code" => BaseCommand::ERR_TOO_MANY_ARGUMENTS,
 				"data" => []
 			];
 		}
-		if($required > 0) {// We still have more unfilled required arguments
+		if($required > 0){// We still have more unfilled required arguments
 			$return["errors"][] = [
 				"code" => BaseCommand::ERR_INSUFFICIENT_ARGUMENTS,
 				"data" => []
@@ -161,7 +166,10 @@ trait ArgumentableTrait{
 		return $return;
 	}
 
-	public function generateUsageMessage(): string {
+	/**
+	 * @return string
+	 */
+	public function generateUsageMessage(): string{
 		$msg = $this->getName() . " ";
 		$args = [];
 		foreach($this->argumentList as $arguments){
@@ -176,7 +184,7 @@ trait ArgumentableTrait{
 			$names = implode("|", $names);
 			if($hasOptional){
 				$args[] = "[" . $names . "]";
-			} else {
+			} else{
 				$args[] = "<" . $names . ">";
 			}
 		}
@@ -185,14 +193,20 @@ trait ArgumentableTrait{
 		return $msg;
 	}
 
-	public function hasArguments(): bool {
+	/**
+	 * @return boolean
+	 */
+	public function hasArguments(): bool{
 		return !empty($this->argumentList);
 	}
 
-	public function hasRequiredArguments(): bool {
-		foreach($this->argumentList as $arguments) {
-			foreach($arguments as $argument) {
-				if(!$argument->isOptional()) {
+	/**
+	 * @return boolean
+	 */
+	public function hasRequiredArguments(): bool{
+		foreach($this->argumentList as $arguments){
+			foreach($arguments as $argument){
+				if(!$argument->isOptional()){
 					return true;
 				}
 			}
@@ -202,9 +216,9 @@ trait ArgumentableTrait{
 	}
 
 	/**
-	 * @return BaseArgument[][]
+	 * @return BaseArgument[]
 	 */
-	public function getArgumentList(): array {
+	public function getArgumentList(): array{
 		return $this->argumentList;
 	}
 }

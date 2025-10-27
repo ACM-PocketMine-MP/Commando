@@ -34,17 +34,33 @@ use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
 use pocketmine\utils\TextFormat;
 
-class InGameRequiredConstraint extends BaseConstraint {
+class InGameRequiredConstraint extends BaseConstraint{
 
-    public function test(CommandSender $sender, string $aliasUsed, array $args): bool {
+    /**
+     * @param CommandSender $sender
+     * @param string $aliasUsed
+     * @param array $args
+     * @return boolean
+     */
+    public function test(CommandSender $sender, string $aliasUsed, array $args): bool{
         return $this->isVisibleTo($sender);
     }
 
-    public function onFailure(CommandSender $sender, string $aliasUsed, array $args): void {
+    /**
+     * @param CommandSender $sender
+     * @param string $aliasUsed
+     * @param array $args
+     * @return void
+     */
+    public function onFailure(CommandSender $sender, string $aliasUsed, array $args): void{
         $sender->sendMessage(TextFormat::RED . "This command must be executed in-game."); // f*ck off grammar police
     }
 
-    public function isVisibleTo(CommandSender $sender): bool {
+    /**
+     * @param CommandSender $sender
+     * @return boolean
+     */
+    public function isVisibleTo(CommandSender $sender): bool{
 		return $sender instanceof Player;
 	}
 }
