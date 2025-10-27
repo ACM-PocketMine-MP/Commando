@@ -111,7 +111,7 @@ class PacketHooker implements Listener{
 	 * @param CommandSender $cs
 	 * @param BaseCommand $command
 	 *
-	 * @return CommandOverload[][]
+	 * @return CommandOverload[]
 	 */
 	private static function generateOverloads(CommandSender $cs, BaseCommand $command): array{
 		$overloads = [];
@@ -167,7 +167,9 @@ class PacketHooker implements Listener{
 			/** @var CommandParameter[] $set */
 			$set = [];
 			foreach($indexes as $k => $index){
-				$param = $set[$k] = clone $input[$k][$index]->getNetworkParameterData();
+				//$param = $set[$k] = clone $input[$k][$index]->getNetworkParameterData();
+				$param = $input[$k][$index]->getNetworkParameterData();
+
 
 				if(isset($param->enum) && $param->enum instanceof CommandHardEnum){
 					$refClass = new ReflectionClass(CommandHardEnum::class);
@@ -175,6 +177,13 @@ class PacketHooker implements Listener{
 					$refProp->setAccessible(true);
 					$refProp->setValue($param->enum, $param->enum->getName());
 				}
+
+				if(isset($param->enum) && $param->enum instanceof CommandHardEnum){
+                    $param = clone $param;
+                    $param->enum = new CommandHardEnum($param->enum->getName(), $param->enum->getValues());
+                }
+
+				$set[$k] = $param;
 			}
 			$combinations[] =  new CommandOverload(false, $set);
 
