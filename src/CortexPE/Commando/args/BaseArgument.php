@@ -35,13 +35,17 @@ use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
 
 abstract class BaseArgument{
 
-	/** @var string $name*/
+	/** @var string $name */
 	protected string $name;
-	/** @var bool $optional*/
+	/** @var bool $optional */
 	protected bool $optional = false;
-	/** @var CommandParameter $parameterData*/
+	/** @var CommandParameter $parameterData */
 	protected CommandParameter $parameterData;
 
+	/**
+	 * @param string $name
+	 * @param boolean $optional
+	 */
 	public function __construct(string $name, bool $optional = false){
 		$this->name = $name;
 		$this->optional = $optional;
@@ -51,6 +55,7 @@ abstract class BaseArgument{
 		$this->parameterData->paramType = AvailableCommandsPacket::ARG_FLAG_VALID;
 		$this->parameterData->paramType |= $this->getNetworkType();
 		$this->parameterData->isOptional = $this->isOptional();
+		$this->parameterData->flags = 0;
 	}
 
 	/**

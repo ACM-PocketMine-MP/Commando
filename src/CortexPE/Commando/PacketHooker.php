@@ -167,16 +167,8 @@ class PacketHooker implements Listener{
 			/** @var CommandParameter[] $set */
 			$set = [];
 			foreach($indexes as $k => $index){
-				//$param = $set[$k] = clone $input[$k][$index]->getNetworkParameterData();
+				//$param = $set[$k] = clone $input[$k][$index]->getNetworkParameterData(); // OH NO
 				$param = $input[$k][$index]->getNetworkParameterData();
-
-
-				if(isset($param->enum) && $param->enum instanceof CommandHardEnum){
-					$refClass = new ReflectionClass(CommandHardEnum::class);
-					$refProp = $refClass->getProperty("enumName");
-					$refProp->setAccessible(true);
-					$refProp->setValue($param->enum, $param->enum->getName());
-				}
 
 				if(isset($param->enum) && $param->enum instanceof CommandHardEnum){
                     $param = clone $param;

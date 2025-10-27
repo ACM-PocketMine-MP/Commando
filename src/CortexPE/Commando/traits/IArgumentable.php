@@ -45,7 +45,7 @@ interface IArgumentable{
 	public function hasArguments(): bool;
 
 	/**
-	 * @return BaseArgument[]
+	 * @return BaseArgument[][]
 	 */
 	public function getArgumentList(): array;
 

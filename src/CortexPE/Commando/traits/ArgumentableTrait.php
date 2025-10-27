@@ -42,9 +42,10 @@ use function is_array;
 use function usort;
 
 trait ArgumentableTrait{
-	/** @var BaseArgument[][] */
+
+	/** @var BaseArgument[][] $argumentList */
 	private array $argumentList = []; // [argumentPosition => [...possible BaseArgument(s)]]
-	/** @var bool[] */
+	/** @var bool[] $requiredArgumentCount */
 	private array $requiredArgumentCount = [];
 
 	/**
@@ -216,7 +217,7 @@ trait ArgumentableTrait{
 	}
 
 	/**
-	 * @return BaseArgument[]
+	 * @return BaseArgument[][]
 	 */
 	public function getArgumentList(): array{
 		return $this->argumentList;
