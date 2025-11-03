@@ -40,7 +40,6 @@ use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
 use pocketmine\network\mcpe\protocol\serializer\AvailableCommandsPacketAssembler;
 use pocketmine\network\mcpe\protocol\serializer\AvailableCommandsPacketDisassembler;
-use pocketmine\network\mcpe\protocol\types\command\CommandData;
 use pocketmine\network\mcpe\protocol\types\command\CommandHardEnum;
 use pocketmine\network\mcpe\protocol\types\command\CommandOverload;
 use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
@@ -70,13 +69,13 @@ class PacketHooker implements Listener{
 		}
 
 		$interceptor = SimplePacketHandler::createInterceptor($registrant, EventPriority::NORMAL, false);
-		$interceptor->interceptOutgoing(function(AvailableCommandsPacket $pk, NetworkSession $target) : bool{
+		$interceptor->interceptOutgoing(function(AvailableCommandsPacket $pk, NetworkSession $target): bool{
 			if(self::$isIntercepting)return true;
 			$p = $target->getPlayer();
 			# ===(PACKET DISASSEMBLER)===
 			$packetDisassembler = AvailableCommandsPacketDisassembler::disassemble($pk);
-			$commandData = [];
-			foreach($packetDisassembler->commandData as $data){
+			$commandData = $packetDisassembler->commandData;
+			foreach($commandData as $data){
 				$commandName = $data->getName();
 				$cmd = Server::getInstance()->getCommandMap()->getCommand($commandName);
 				if($cmd instanceof BaseCommand){
@@ -85,20 +84,14 @@ class PacketHooker implements Listener{
 							continue 2;
 						}
 					}
-
-					$overloads = self::generateOverloads($p, $cmd);
-					$commandData[] = new CommandData($data->getName(), $data->getDescription(), $data->getFlags(), $data->getPermission(), $data->getAliases(), $overloads, $data->getChainedSubCommandData());
-				}else{
-					$commandData[] = $data; // NOTE: $packetDisassembler->commandData[]
+					$data->overloads = self::generateOverloads($p, $cmd);
 				}
+
 			}
 
 			# ===(PACKET ASSEMBLER)===
-			$packetAssembler = AvailableCommandsPacketAssembler::assemble($commandData, array_values($packetDisassembler->unusedHardEnums), array_values($packetDisassembler->unusedSoftEnums));
-            $packetAssembler->softEnums = SoftEnumStore::getEnums();
-
 			self::$isIntercepting = true;
-			$target->sendDataPacket($packetAssembler);
+			$target->sendDataPacket(AvailableCommandsPacketAssembler::assemble($commandData, [], SoftEnumStore::getEnums()));
 			self::$isIntercepting = false;
 			return false;
 		});
@@ -125,12 +118,7 @@ class PacketHooker implements Listener{
 				}
 			}
 
-			$scParam = new CommandParameter();
-			$scParam->paramName = $label;
-			$scParam->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_FLAG_ENUM;
-			$scParam->isOptional = false;
-			$scParam->enum = new CommandHardEnum($subCommand->getName(), [$label]);
-			$scParam->flags = 0;
+			$scParam = CommandParameter::enum($label, new CommandHardEnum($label, [$label]), 0, false);
 
 			$overloadList = self::generateOverloadList($subCommand);
 			if(!empty($overloadList)){
@@ -169,11 +157,13 @@ class PacketHooker implements Listener{
 				//$param = $set[$k] = clone $input[$k][$index]->getNetworkParameterData(); // OH NO
 				$param = $input[$k][$index]->getNetworkParameterData();
 
+				
 				if(isset($param->enum) && $param->enum instanceof CommandHardEnum){
-                    $param = clone $param;
-                    $param->enum = new CommandHardEnum($param->enum->getName(), $param->enum->getValues());
-                }
-
+					$param->enum = new CommandHardEnum(
+						"enum#" . spl_object_id($param->enum),
+						$param->enum->getValues()
+					);
+				}
 				$set[$k] = $param;
 			}
 			$combinations[] =  new CommandOverload(false, $set);

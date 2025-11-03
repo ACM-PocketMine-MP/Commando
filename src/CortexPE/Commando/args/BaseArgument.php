@@ -50,12 +50,7 @@ abstract class BaseArgument{
 		$this->name = $name;
 		$this->optional = $optional;
 
-		$this->parameterData = new CommandParameter();
-		$this->parameterData->paramName = $name;
-		$this->parameterData->paramType = AvailableCommandsPacket::ARG_FLAG_VALID;
-		$this->parameterData->paramType |= $this->getNetworkType();
-		$this->parameterData->isOptional = $this->isOptional();
-		$this->parameterData->flags = 0;
+		$this->parameterData = CommandParameter::standard($name, $this->getNetworkType(), 0, $this->isOptional());
 	}
 
 	/**

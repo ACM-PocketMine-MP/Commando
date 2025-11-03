@@ -31,6 +31,7 @@ namespace CortexPE\Commando\args;
 
 use pocketmine\command\CommandSender;
 use pocketmine\network\mcpe\protocol\types\command\CommandHardEnum;
+use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
 
 use function array_keys;
 use function array_map;
@@ -48,7 +49,7 @@ abstract class StringEnumArgument extends BaseArgument{
 	 */
 	public function __construct(string $name, bool $optional = false){
 		parent::__construct($name, $optional);
-		$this->parameterData->enum = new CommandHardEnum("", $this->getEnumValues());
+		$this->parameterData = CommandParameter::enum($name, new CommandHardEnum("", $this->getEnumValues()), 0, $optional);
 	}
 
 	/**
